@@ -36,3 +36,41 @@
     transform: rotate(360deg);
   }
 }
+
+/* resume builder */
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.builder {
+  width: 60%;
+  border: solid 1px;
+  margin: 10px;
+  height: 500px;
+}
+.options {
+  width: 40%;
+  border: solid 1px;
+  margin: 10px;
+  height: 500px;
+}
+
+.component {
+  position: absolute;
+}
+.options-root {
+  /* padding: 10px; */
+  border: solid 1px;
+  margin: 10px;
+}
+
+.builder {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  /* position: relative; */
+}
+
+/* .abs {
+  position: absolute;
+} */
