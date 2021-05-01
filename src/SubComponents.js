@@ -86,7 +86,7 @@ var getComponent = function(componentType, data){
                 defaultValue={data.defaultValue}
                 step={1}
                 min={0}
-                max={10}
+                max={100}
                 onChangeCommitted = {(event, value) =>{
                     data.valueChanged(event, value, componentType)
                 }}
@@ -98,7 +98,7 @@ var getComponent = function(componentType, data){
                 defaultValue={data.defaultValue}
                 step={1}
                 min={0}
-                max={1000}
+                max={2000}
                 onChangeCommitted = {(event, value) =>{
                     data.valueChanged(event, value, componentType)
                 }}

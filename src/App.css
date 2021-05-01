@@ -44,16 +44,22 @@
 }
 
 .builder {
-  width: 60%;
-  border: solid 1px;
+  width: 770px;
+  /* width: 320px; */
+  border: solid 1px red;
   margin: 10px;
-  height: 500px;
+  height: 1100px;
+  /* height: 415px; */
+  position: relative;
 }
 .options {
-  width: 40%;
-  border: solid 1px;
+  /* width: 40%; */
+  width: 200px;
+  border: solid 1px green;
   margin: 10px;
-  height: 500px;
+  height: 415px;
+  /* position: relative; */
+  /* left: 200px; */
 }
 
 .component {
@@ -61,13 +67,13 @@
 }
 .options-root {
   /* padding: 10px; */
-  border: solid 1px;
+  border: solid 1px green;
   margin: 10px;
 }
 
 .builder {
   overflow-x: scroll;
-  overflow-y: hidden;
+  overflow-y: scroll;
   /* position: relative; */
 }
 

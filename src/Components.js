@@ -2,6 +2,12 @@ import React, { Component } from 'react';
 import Draggable from 'react-draggable'
 import { IOption } from './SubComponents';
 import ReactDOM from 'react-dom';
+// import {jsPDF} from 'jsPdf'
+import { jsPDF } from "jspdf";
+import html2canvas from 'html2canvas'
+// import {html2pdf} from 'html-to-pdf-js'
+// import * as puppeteer from 'puppeteer'
+
 
 var getCustomizationsForType = function(type){
     var customization =
@@ -45,6 +51,14 @@ var getCustomizationsForType = function(type){
             break;
         }
         case "divider":{
+            let additionalCustomizations = [
+                {
+                    "name": "width",
+                    "label": "Width",
+                    "component": "width"
+                }
+            ]
+            customization = customization.concat(additionalCustomizations)
             break;
         }
         case "background":{
@@ -70,6 +84,75 @@ var getCustomizationsForType = function(type){
         }
     }
     return customization;
+}
+var scriptAdded = false;
+function addScript(url, callback) {
+    if(scriptAdded){
+        callback()
+        return;
+    }
+    var script = document.createElement('script');
+    script.type = 'application/javascript';
+    script.src = url;
+    scriptAdded = true
+    script.onload = callback;
+    document.head.appendChild(script);
+    // return Promise.resolve({data: "done"})
+}
+var downloadPDF = function(){
+
+    addScript('https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js', function(){
+        let ele = document.getElementById('custom-builder')
+        var pdf = window.html2pdf()
+        pdf.set({
+            jsPDF:{unit: 'in', orientation: 'portrait'}
+        }).from(ele).save()
+    })
+    // const doc = new jsPDF("portrait", "mm", 'a4')//[440,200]
+    // var elementHandlers = {
+    //     "#root": function(element, renderer){
+    //         return true
+    //     }
+    // }
+    // doc.html(document.getElementById("root"), {
+    //     html2canvas: {
+    //         // insert html2canvas options here, e.g.
+    //         width: 2000
+    //     },
+    //     callback: function(pdf){
+    //         // pdf.save('custom-builder.pdf')
+    //         window.open(pdf.output("bloburl"), "_blank")
+    //     }
+    // })
+    // html2canvas(document.getElementById('print'), {
+    //     onrendered: function(canvas) {
+  
+    //       var img = canvas.toDataURL("image/png");
+    //       var doc = new jsPDF();
+    //       doc.addImage(img, 'JPEG', 20, 20);
+    //       doc.save('test.pdf');
+    //     }
+  
+    //   });
+    // const element = document.getElementById("print");
+    //     // Choose the element and save the PDF for our user.
+    //     html2pdf()
+    //       .from(element)
+    //       .save();
+    
+    // html2canvas(document.getElementById("custom-builder")).then(function(canvas){
+    //     var pdf = new jsPDF("p", "mm", "a4")
+    //     var imgData = canvas.toDataURL('image/jpeg', 1.0)
+    //     pdf.addImage(imgData, 'JPEG', 10, 10, 180, 150)
+    //     window.open(pdf.output("bloburl"), "_blank")
+    //     // pdf.save('file.pdf')
+    // })
+
+    
+    
+    
+    // x.from(ele).save()
+    
 }
 
 export class BaseBuilder extends Component{
@@ -126,14 +209,16 @@ export class BaseBuilder extends Component{
     }
     render(){
         return (<div className='row'>
-            <div className='builder'>
-                {/* <div className="abs"> */}
+            {/* <div className='print' id='print'> */}
+                <div className='builder' id='custom-builder'>
+                    {/* <div className="abs"> */}
 
-                {this.props.prop.components.map((component) => {
-                    return component
-                })}
-                {/* </div> */}
-            </div>
+                    {this.props.prop.components.map((component) => {
+                        return component
+                    })}
+                    {/* </div> */}
+                </div>
+            {/* </div> */}
             <div className='options' id='options-box'>
                 
             </div>
@@ -177,10 +262,14 @@ export class Options extends Component{
         let properties = this.props.prop
         properties.valueChanged = listener
         let customizations = getCustomizationsForType(this.props.prop.type)
-        return (<div className='options-root'>
+        return (
+        <div>
+        <div className='options-root'>
             {customizations.map((option) => {
                 return <IOption prop={{properties: properties, option: option}}></IOption>
-            })} 
+            })}
+            </div>
+            <button onClick={downloadPDF}>Download as PDF</button>
             </div>
         );
     }
@@ -191,11 +280,13 @@ export class DividerComponent extends Component{
         super(props)
     }
     state = {
-        "type" :"dashed",
+        "type" :"divider",
+        "divider-style": "dashed",
         "size":2,
         "color": "black",
         isDraggable: true,
-        "opacity": 1
+        "opacity": 1,
+        "width": "700px"
     }
     valueChanged(key, value){
         if(this.state[key] != null && value != null){
@@ -211,12 +302,13 @@ export class DividerComponent extends Component{
         showOptions(this.state, this.valueChanged.bind(this))
     }
     render(){
-        let bordercss = this.state.size+"px "+this.state.type+" "+this.state.color
+        let bordercss = this.state.size+"px "+this.state['divider-style']+" "+this.state.color
         let style = {
             size: this.state.size,
             color: this.state.color,
             "border-top": bordercss ,
-            "opacity": this.state.opacity
+            "opacity": this.state.opacity,
+            width: this.state.width
         }
         let component = <hr className={this.state.type} style={style}></hr>
         if(this.state.isDraggable){
@@ -240,7 +332,7 @@ export class Background extends Component{
         "height": "50px !important",
         isDraggable: true,
         "opacity": 1,
-        "border-radius": 0,
+        "round-corners": 0,
         "type": "background"
         
     }
@@ -265,7 +357,7 @@ export class Background extends Component{
             color: this.state.color,
             "background-color": this.state.color ,
             "opacity": this.state.opacity,
-            "border-radius": this.state['border-radius'],
+            "border-radius": this.state['round-corners'],
             "border": "solid 1px "+this.state.color
         }
         let component = <div className={this.state.type} style={style}></div>
