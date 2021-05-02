@@ -52,6 +52,9 @@
   /* height: 415px; */
   position: relative;
 }
+hr {
+  border-bottom: none;
+}
 .options {
   /* width: 40%; */
   width: 200px;

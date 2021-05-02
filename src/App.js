@@ -17,6 +17,9 @@ function App() {
         {
           "name": "divider",
           "display": "Divider"
+        },{
+          "name": "bullet",
+          "display": "Bullet Text"
         }]
       }}/>
   );

@@ -7,6 +7,11 @@ import { jsPDF } from "jspdf";
 import html2canvas from 'html2canvas'
 // import {html2pdf} from 'html-to-pdf-js'
 // import * as puppeteer from 'puppeteer'
+// import * as fonts from "@fortawesome/fontawesome-free"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import fontawesome from '@fortawesome/fontawesome'
+import { HiOutlineMailOpen, HiOutlineLocationMarker } from "react-icons/hi";
+import {FaRegCalendarAlt, FaPhoneSquareAlt, FaLinkedinIn} from 'react-icons/fa';
 
 
 var getCustomizationsForType = function(type){
@@ -56,6 +61,11 @@ var getCustomizationsForType = function(type){
                     "name": "width",
                     "label": "Width",
                     "component": "width"
+                },
+                {
+                    "name": "divider-style",
+                    "label": "Divider Style",
+                    "component": "text-box"
                 }
             ]
             customization = customization.concat(additionalCustomizations)
@@ -87,20 +97,21 @@ var getCustomizationsForType = function(type){
 }
 var scriptAdded = false;
 function addScript(url, callback) {
-    if(scriptAdded){
+    if(window.html2pdf){
         callback()
         return;
     }
     var script = document.createElement('script');
     script.type = 'application/javascript';
     script.src = url;
-    scriptAdded = true
+    // scriptAdded = true
+    // script.crossorigin="anonymous"
     script.onload = callback;
     document.head.appendChild(script);
     // return Promise.resolve({data: "done"})
 }
 var downloadPDF = function(){
-
+    document.getElementById("custom-builder").style.border = 'none'
     addScript('https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js', function(){
         let ele = document.getElementById('custom-builder')
         var pdf = window.html2pdf()
@@ -168,6 +179,7 @@ export class BaseBuilder extends Component{
     constructor(props){
         super(props)
         this.compNameRef = React.createRef(null)
+        // addScript("https://kit.fontawesome.com/yourcode.js", function(){})
     }
     deleteComponent(ele){
         console.log("removing")
@@ -176,7 +188,7 @@ export class BaseBuilder extends Component{
         this.setState({components: this.props.prop.components})
     }
     addComponent(name){
-        let components = ["text", 'divider', 'background']
+        let components = ["text", 'divider', 'background', "bullet", "icon"]
         if(components.includes(name)){
             let component = null;
             switch(name){
@@ -194,6 +206,18 @@ export class BaseBuilder extends Component{
                 }
                 case "background":{
                     component = <Background prop={{deleteComponent: this.deleteComponent.bind(this)}}/>
+                    this.props.prop.components.push(component);
+                    this.setState({components: this.props.prop.components})
+                    break;
+                }
+                case "bullet":{
+                    component = <BulletTextComponent prop={{deleteComponent: this.deleteComponent.bind(this)}}/>
+                    this.props.prop.components.push(component);
+                    this.setState({components: this.props.prop.components})
+                    break;
+                }
+                case "icon":{
+                    component = <IconComponent prop={{deleteComponent: this.deleteComponent.bind(this)}}/>
                     this.props.prop.components.push(component);
                     this.setState({components: this.props.prop.components})
                     break;
@@ -239,7 +263,6 @@ export class BaseBuilder extends Component{
         </div>);
     }
 }
-
 
 export class Options extends Component{
     constructor(props){
@@ -370,6 +393,146 @@ export class Background extends Component{
         return component;
     }
 }
+
+export class IconComponent extends Component{
+    constructor(props){
+        super(props)
+        // this.handleOnStart.bind(this)
+        // this.handleOnStop.bind(this)
+    }
+    state = {
+        "text": "coffee",
+        "isDraggable": true,
+        "type": "icon",
+        "size":"12",
+        "color": "black",
+        "opacity": 1,
+        iconMap: {
+            "linkedin": <FaLinkedinIn/>,
+            "email": <HiOutlineMailOpen/>,
+            "phone": <FaPhoneSquareAlt/>,
+            "location": <HiOutlineLocationMarker/>,
+            "calendar": <FaRegCalendarAlt/>
+        }
+    }
+    handleOnStart(){
+        // this.props.parent.setListener(this.valueChanged)
+        showOptions(this.state, this.valueChanged.bind(this))
+    }
+    handleOnStop(){
+        showOptions(this.state, this.valueChanged.bind(this))
+    }
+    valueChanged(key, value){
+        // console.log("listener for root element")
+        // console.log(key+ " "+ value)
+        if(value == "${COMPONENT_DELETE}"){
+            this.props.prop.deleteComponent(this)
+        }
+        if(this.state[key] != null && value != null){
+            this.state[key] = value; 
+            this.setState({key: value})
+        }
+    }
+    render(){
+        let style = {
+            color: this.state.color,
+            fontSize: this.state.size+"px",
+            opacity: this.state.opacity,
+            border: "solid 1px"
+        }
+        let classes = "fas component icon-component fa-"+this.state.text
+        let component = <i style={style} contentEditable="true" className={classes}></i>
+        if(this.state.isDraggable){
+            return (
+                <Draggable
+                onStart = {this.handleOnStart.bind(this)}
+                onStop =  {this.handleOnStop.bind(this)}
+                >
+                    this.state.iconMap[this.state.text]
+                </Draggable>
+                );
+        }
+        return component
+    }
+}
+
+
+export class BulletTextComponent extends Component{
+    constructor(props){
+        super(props)
+        // this.handleOnStart.bind(this)
+        // this.handleOnStop.bind(this)
+    }
+    state = {
+        "text": "Test",
+        "isDraggable": true,
+        "type": "text",
+        "size":"12",
+        "color": "black",
+        "bold":false,
+        "italic":false,
+        "opacity": 1
+    }
+    handleOnStart(){
+        // this.props.parent.setListener(this.valueChanged)
+        showOptions(this.state, this.valueChanged.bind(this))
+    }
+    handleOnStop(){
+        showOptions(this.state, this.valueChanged.bind(this))
+    }
+    valueChanged(key, value){
+        // console.log("listener for root element")
+        // console.log(key+ " "+ value)
+        if(value == "${COMPONENT_DELETE}"){
+            this.props.prop.deleteComponent(this)
+        }
+        if(this.state[key] != null && value != null){
+            this.state[key] = value; 
+            this.setState({key: value})
+        }
+    }
+    render(){
+        let style = {
+            color: this.state.color,
+            fontSize: this.state.size+"px",
+            opacity: this.state.opacity,
+            display:"list-item",
+            "list-style-type": "disc",
+            "list-style-position": "inside"
+        }
+        if(this.state.bold){
+            style["font-weight"] = "bold"
+        }
+        else{
+            style["font-weight"] = "normal"
+        }
+        if(this.state.italic){
+            style["font-style"] = "italic"
+        }
+        else{
+            style["font-style"] = "normal"
+        }
+        // if(this.state.visible){
+        //     style["display"] = "block"
+        // }
+        // else{
+        //     style["display"] = "none"
+        // }
+        let component = <span style={style} contentEditable="true" className='component text-component'>{this.state.text}</span>
+        if(this.state.isDraggable){
+            return (
+                <Draggable
+                onStart = {this.handleOnStart.bind(this)}
+                onStop =  {this.handleOnStop.bind(this)}
+                >
+                    {component}
+                </Draggable>
+                );
+        }
+        return component
+    }
+}
+
 
 export class TextComponent extends Component{
     constructor(props){
